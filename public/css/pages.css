@@ -1,0 +1,10 @@
+
+.content { flex: 1; padding: 24px; overflow-y: auto; max-width: 100%; }
+.page    { display: none; animation: fu .3s ease; }
+.page.on { display: block; }
+@keyframes fu { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.ptitle { font-family: var(--head); font-weight: 700; font-size: 1.5rem; margin-bottom: 4px; letter-spacing: .02em; }
+.psub   { color: var(--td); font-family: var(--mono); font-size: 11px; margin-bottom: 22px; }
+h3      { font-family: var(--head); font-weight: 600; font-size: 1rem; margin-bottom: 12px; }
+

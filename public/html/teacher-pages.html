@@ -1,0 +1,312 @@
+<!-- T: DASHBOARD -->
+    <div class="page" id="t-dashboard" style="display:none">
+      <div class="ptitle">Panel del Docente</div>
+      <div class="psub" id="teacher-subtitle">// Cargando…</div>
+
+      <div class="g3" style="margin-bottom:14px">
+        <div class="scard"><div class="sico">📝</div><div><div class="sval" id="t-total-pracs">0</div><div class="slbl">PRÁCTICAS CREADAS</div></div></div>
+        <div class="scard"><div class="sico">✅</div><div><div class="sval" id="t-published">0</div><div class="slbl">PUBLICADAS</div></div></div>
+        <div class="scard"><div class="sico">⏳</div><div><div class="sval" id="t-pending-grade">0</div><div class="slbl">POR CALIFICAR</div></div></div>
+      </div>
+      <div class="g2" style="margin-bottom:20px">
+        <div class="scard"><div class="sico">👥</div><div><div class="sval" id="t-student-count">0</div><div class="slbl">ALUMNOS INSCRITOS</div></div></div>
+        <div class="scard"><div class="sico">📤</div><div><div class="sval" id="t-total-submissions">0</div><div class="slbl">ENTREGAS TOTALES</div></div></div>
+      </div>
+
+      <div class="g2">
+        <div>
+          <h3>Entregas recientes</h3>
+          <div class="card" id="t-recent-submissions">
+            <div class="empty"><div class="eico">📮</div><div class="etxt">Sin entregas todavía.</div></div>
+          </div>
+        </div>
+        <div>
+          <h3>Estado del grupo</h3>
+          <div class="card" id="t-group-status">
+            <div class="empty"><div class="eico">👥</div><div class="etxt">Publica prácticas para ver el progreso.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- T: MIS PRÁCTICAS -->
+    <div class="page" id="t-practicas" style="display:none">
+      <div class="ptitle">Mis Prácticas</div>
+      <div class="psub">// Gestiona las prácticas del curso</div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+        <button class="btn bp" onclick="showPage('t-editor', document.querySelector('#sidebar-teacher .si:nth-child(3)'), 'sidebar-teacher')">+ Nueva Práctica</button>
+      </div>
+      <div class="ga" id="t-prac-list">
+        <div class="empty"><div class="eico">📝</div><div class="etxt">Aún no has creado prácticas.</div><div class="esub">Usa el Editor para crear la primera.</div></div>
+      </div>
+    </div>
+
+    <!-- T: EDITOR DE PRÁCTICA -->
+    <div class="page" id="t-editor" style="display:none">
+      <div class="ptitle">Editor de Práctica</div>
+      <div class="psub">// Rellena los campos — la plataforma genera el formato automáticamente</div>
+
+      <div class="g2">
+        <!-- Columna izquierda -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+
+          <div class="card">
+            <h3>Información General</h3>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div><label>Número de Práctica</label><input type="text" id="ed-num" placeholder="Ej: P-01"></div>
+              <div><label>Título</label><input type="text" id="ed-title" placeholder="Control de Intensidad con PWM"></div>
+              <div><label>Objetivo</label><textarea id="ed-objective" placeholder="Al finalizar, el alumno comprenderá…"></textarea></div>
+              <div>
+                <label>Dificultad</label>
+                <select id="ed-difficulty">
+                  <option value="1">⭐ Básica</option>
+                  <option value="2" selected>⭐⭐ Intermedia</option>
+                  <option value="3">⭐⭐⭐ Avanzada</option>
+                </select>
+              </div>
+              <div>
+                <label>Tipo de entrega del alumno</label>
+                <select id="ed-delivery">
+                  <option value="photo">📷 Foto de práctica realizada</option>
+                  <option value="quiz">📝 Cuestionario en plataforma</option>
+                  <option value="both">📋 Ambos (foto + cuestionario)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Lista de Materiales / Componentes</h3>
+            <div style="font-size:12px;color:var(--td);font-family:var(--mono);margin-bottom:8px">Marca los componentes que se necesitan en el módulo físico</div>
+            <div class="chk" id="ed-comp-list">
+              <div class="chi"><input type="checkbox"><span>Arduino UNO</span></div>
+              <div class="chi"><input type="checkbox"><span>LED rojo 5mm</span></div>
+              <div class="chi"><input type="checkbox"><span>LED verde 5mm</span></div>
+              <div class="chi"><input type="checkbox"><span>LED azul 5mm</span></div>
+              <div class="chi"><input type="checkbox"><span>Resistencia 220Ω</span></div>
+              <div class="chi"><input type="checkbox"><span>Resistencia 1kΩ</span></div>
+              <div class="chi"><input type="checkbox"><span>Potenciómetro 10kΩ</span></div>
+              <div class="chi"><input type="checkbox"><span>Botón pulsador</span></div>
+              <div class="chi"><input type="checkbox"><span>Buzzer activo</span></div>
+              <div class="chi"><input type="checkbox"><span>Sensor TMP36</span></div>
+              <div class="chi"><input type="checkbox"><span>Display 7 segmentos</span></div>
+              <div class="chi"><input type="checkbox"><span>Protoboard</span></div>
+              <div class="chi"><input type="checkbox"><span>Jumpers</span></div>
+              <div class="chi"><input type="checkbox"><span>Multímetro</span></div>
+            </div>
+            <button class="btn bg btn-sm" style="margin-top:8px" onclick="addCustomComponent()">+ Componente personalizado</button>
+          </div>
+
+        </div>
+
+        <!-- Columna derecha -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+
+          <div class="card">
+            <h3>Pasos de la Práctica</h3>
+            <div id="ed-steps" style="display:flex;flex-direction:column;gap:8px">
+              <div class="step-row" style="display:flex;gap:8px;align-items:flex-start">
+                <span class="tag tc" style="flex-shrink:0;margin-top:8px">01</span>
+                <textarea placeholder="Primer paso de la práctica…" style="flex:1;min-height:56px"></textarea>
+              </div>
+            </div>
+            <button class="btn bg btn-sm" style="margin-top:10px" onclick="addStep()">+ Agregar paso</button>
+          </div>
+
+          <div class="card">
+            <h3>Diagrama de Conexión</h3>
+            <div style="font-size:12px;color:var(--td);font-family:var(--mono);margin-bottom:8px">Escribe el diagrama en texto ASCII o describe las conexiones</div>
+            <textarea id="ed-circuit" style="font-family:var(--mono);font-size:12px;min-height:100px" placeholder="[Pin 9] ─── [R 220Ω] ─── [LED+] ─── [GND]"></textarea>
+          </div>
+
+          <div class="card">
+            <h3>Código Arduino (.ino)</h3>
+            <textarea id="ed-code" style="font-family:var(--mono);font-size:12px;min-height:110px" placeholder="void setup() { ... }&#10;void loop()  { ... }"></textarea>
+          </div>
+
+          <div class="card">
+            <h3>Archivos Adjuntos</h3>
+            <div style="font-size:12px;color:var(--td);font-family:var(--mono);margin-bottom:8px">PDF, imágenes, videos y archivos .ino de apoyo</div>
+            <div class="drop" data-context="material" id="editor-drop"
+                 onclick="this.querySelector('input').click()">
+              <input type="file" multiple
+                     accept=".pdf,.ino,image/jpeg,image/png,video/mp4,video/quicktime"
+                     onchange="handleEditorFiles(event)">
+              <div style="font-size:28px;margin-bottom:8px">📁</div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--td)">Arrastra o haz clic</div>
+              <div style="font-size:11px;color:var(--tf);margin-top:4px">PDF · .ino · Imágenes · Video · máx. 50 MB c/u</div>
+            </div>
+            <div id="editor-file-list" style="margin-top:10px;display:flex;flex-direction:column;gap:6px"></div>
+          </div>
+
+          <div style="display:flex;gap:10px">
+            <button class="btn bp" style="flex:1" onclick="ElectroLab.saveFromEditor(true)">🟢 Publicar Práctica</button>
+            <button class="btn bg"                onclick="ElectroLab.saveFromEditor(false)">📄 Guardar Borrador</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- T: ALUMNOS -->
+    <div class="page" id="t-alumnos" style="display:none">
+      <div class="ptitle">Alumnos del Grupo</div>
+      <div class="psub">// G2 — Electrotecnia IPN</div>
+
+      <div class="g2" style="margin-bottom:20px">
+
+        <!-- Formulario de inscripción -->
+        <div class="card">
+          <h3>Inscribir Alumno</h3>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div><label>Nombre completo</label><input type="text" id="enroll-name" placeholder="Juan Méndez García"></div>
+            <div><label>Matrícula</label><input type="text" id="enroll-matricula" placeholder="2022630001"></div>
+            <div><label>Correo institucional</label><input type="email" id="enroll-email" placeholder="alumno@ipn.mx"></div>
+            <div><label>Contraseña inicial</label><input type="password" id="enroll-password" placeholder="El alumno la usa para entrar"></div>
+            <div>
+              <label>Grupo</label>
+              <select id="enroll-group">
+                <option value="G1">G1</option>
+                <option value="G2" selected>G2</option>
+                <option value="G3">G3</option>
+                <option value="G4">G4</option>
+              </select>
+            </div>
+            <button class="btn bp" onclick="submitEnrollForm()">+ Inscribir Alumno</button>
+          </div>
+        </div>
+
+        <!-- Estadísticas rápidas -->
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="scard">
+            <div class="sico">👥</div>
+            <div><div class="sval" id="t-student-count">0</div><div class="slbl">ALUMNOS INSCRITOS</div></div>
+          </div>
+          <div class="card" style="font-size:13px;color:var(--td);line-height:1.7">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--tf);letter-spacing:.1em;margin-bottom:8px">INSTRUCCIONES</div>
+            Inscribe a los alumnos uno por uno o importa la lista desde tu BD cuando la tengas lista.<br><br>
+            La matrícula es el identificador único. No se permiten duplicados.<br><br>
+            El botón <span class="tag tr" style="font-size:9px">Dar de baja</span> desactiva al alumno — sus entregas se conservan en el historial.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tabla de alumnos -->
+      <h3>Alumnos Registrados</h3>
+      <div class="card" style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:600px">
+          <thead>
+            <tr style="border-bottom:1px solid var(--b);font-family:var(--mono);font-size:10px;color:var(--tf)">
+              <th style="padding:8px;text-align:left">Alumno / Matrícula</th>
+              <th style="padding:8px;text-align:left">Grupo</th>
+              <th style="padding:8px;text-align:left">Correo</th>
+              <th style="padding:8px;text-align:left">Entregas</th>
+              <th style="padding:8px;text-align:left">Promedio</th>
+              <th style="padding:8px;text-align:left">Estado / Acción</th>
+            </tr>
+          </thead>
+          <tbody id="student-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- T: FORO / CALIFICACIONES -->
+    <div class="page" id="t-foro" style="display:none">
+      <div class="ptitle">Foro de Colaboración</div>
+      <div class="psub">// Califica entregas y deja retroalimentación a tus alumnos</div>
+
+      <!-- Campo oculto para ID de entrega seleccionada -->
+      <input type="hidden" id="foro-submission-id" value="">
+
+      <div class="g2">
+        <div>
+          <h3>Entregas Pendientes</h3>
+          <div id="foro-entregas">
+            <div class="empty"><div class="eico">✅</div><div class="etxt">No hay entregas pendientes de calificar.</div></div>
+          </div>
+        </div>
+        <div>
+          <h3>Agregar Calificación</h3>
+          <div class="card" style="display:flex;flex-direction:column;gap:12px">
+            <div>
+              <label>Alumno</label>
+              <select id="foro-student">
+                <!-- Se rellena desde AppState.students -->
+              </select>
+            </div>
+            <div>
+              <label>Práctica</label>
+              <select id="foro-practice">
+                <option value="">— Selecciona una práctica —</option>
+              </select>
+            </div>
+            <div>
+              <label>Calificación (0–10)</label>
+              <input type="number" id="foro-grade" min="0" max="10" step="0.5" placeholder="8.5">
+            </div>
+            <div>
+              <label>Comentario para el alumno</label>
+              <textarea id="foro-feedback" placeholder="Buen trabajo, aunque la resistencia limitadora debería ser 220Ω…"></textarea>
+            </div>
+            <button class="btn bp" onclick="ElectroLab.submitGradeFromForum()">Enviar Retroalimentación</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- T: SUBIR MATERIAL -->
+    <div class="page" id="t-subir" style="display:none">
+      <div class="ptitle">Subir Material</div>
+      <div class="psub">// Repositorio del docente — materiales de apoyo para los alumnos</div>
+
+      <div class="g2">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card">
+            <h3>Nuevo Material</h3>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div><label>Título del material</label><input type="text" id="mat-title" placeholder="Guía de referencia Ley de Ohm"></div>
+              <div>
+                <label>Categoría</label>
+                <select id="mat-category">
+                  <option value="pdf">📄 PDF / Guía</option>
+                  <option value="video">🎥 Video</option>
+                  <option value="code">💾 Código Arduino (.ino)</option>
+                  <option value="image">🖼️ Diagrama / Imagen</option>
+                </select>
+              </div>
+              <div>
+                <label>Práctica relacionada (opcional)</label>
+                <select id="mat-practice">
+                  <option value="">— General (sin práctica específica) —</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="drop" data-context="material" id="mat-drop"
+               onclick="this.querySelector('input').click()">
+            <input type="file" id="mat-file-input"
+                   accept=".pdf,.ino,image/jpeg,image/png,video/mp4,video/quicktime"
+                   onchange="handleMaterialUpload(event)">
+            <div style="font-size:32px;margin-bottom:8px">📤</div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--td)">Arrastra el archivo aquí</div>
+            <div style="font-size:11px;color:var(--tf);margin-top:4px">PDF · .ino · PNG · JPG · MP4 · máx. 50 MB</div>
+          </div>
+
+          <button class="btn bp" onclick="saveMaterial()">Publicar Material</button>
+        </div>
+
+        <div>
+          <h3>Materiales Publicados</h3>
+          <div class="card" id="mat-list" style="display:flex;flex-direction:column;gap:8px;min-height:100px">
+            <div class="empty"><div class="eico">📂</div><div class="etxt">Sin materiales subidos todavía.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ========================================================
+         PANEL BIBLIOTECA — PÁGINAS
+         ======================================================== -->

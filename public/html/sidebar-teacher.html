@@ -1,0 +1,10 @@
+<aside class="sidebar" id="sidebar-teacher" style="display:none">
+    <div class="ss">Gestión</div>
+    <div class="si on" onclick="showPage('t-dashboard', this, 'sidebar-teacher')"><span class="ico">📊</span>Dashboard</div>
+    <div class="si"    onclick="showPage('t-practicas', this, 'sidebar-teacher'); ElectroLab.renderTeacherPractices()"><span class="ico">📝</span>Mis Prácticas</div>
+    <div class="si"    onclick="showPage('t-editor',    this, 'sidebar-teacher')"><span class="ico">✏️</span>Editor de Práctica</div>
+    <div class="si"    onclick="showPage('t-alumnos',   this, 'sidebar-teacher')"><span class="ico">👥</span>Alumnos</div>
+    <div class="ss">Colaboración</div>
+    <div class="si"    onclick="showPage('t-foro',      this, 'sidebar-teacher'); ElectroLab.renderPendingSubmissions()"><span class="ico">💬</span>Foro / Calificaciones</div>
+    <div class="si"    onclick="showPage('t-subir',     this, 'sidebar-teacher')"><span class="ico">📤</span>Subir Material</div>
+  </aside>

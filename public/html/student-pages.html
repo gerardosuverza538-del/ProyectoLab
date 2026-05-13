@@ -1,0 +1,71 @@
+<!-- S: DASHBOARD -->
+    <div class="page on" id="s-dashboard">
+      <div class="ptitle">Dashboard</div>
+      <div class="psub" id="dash-subtitle">// Cargando…</div>
+
+      <div class="g3" style="margin-bottom:20px">
+        <div class="scard"><div class="sico">📚</div><div><div class="sval" id="dash-completed">0</div><div class="slbl">PRÁCTICAS COMPLETADAS</div></div></div>
+        <div class="scard"><div class="sico">⏳</div><div><div class="sval" id="dash-pending">0</div><div class="slbl">TAREAS PENDIENTES</div></div></div>
+        <div class="scard"><div class="sico">📦</div><div><div class="sval" id="dash-total">0</div><div class="slbl">PRÁCTICAS DISPONIBLES</div></div></div>
+      </div>
+
+      <div class="g2">
+        <div>
+          <h3>Prácticas disponibles</h3>
+          <div class="card">
+            <div id="dash-prac-list" style="display:flex;flex-direction:column;gap:10px">
+              <div class="empty"><div class="eico">📭</div><div class="etxt">Aún no hay prácticas publicadas.</div></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3>Mis entregas</h3>
+          <div class="card">
+            <div id="dash-submissions" style="display:flex;flex-direction:column;gap:10px">
+              <div class="empty"><div class="eico">📮</div><div class="etxt">No has entregado nada todavía.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S: PRÁCTICAS -->
+    <div class="page" id="s-practicas">
+      <div class="ptitle">Prácticas del Curso</div>
+      <div class="psub">// Solo se muestran las prácticas publicadas por el docente</div>
+      <div class="ga" id="prac-list">
+        <div class="empty"><div class="eico">📭</div><div class="etxt">Aún no hay prácticas publicadas.</div><div class="esub">Tu maestro las irá subiendo durante el curso.</div></div>
+      </div>
+    </div>
+
+    <!-- S: MIS TAREAS (cuestionarios y fotos integrados aquí) -->
+    <div class="page" id="s-tareas">
+      <div class="ptitle">Mis Tareas</div>
+      <div class="psub">// Completa cuestionarios y sube fotos directamente desde aquí</div>
+      <div id="task-list">
+        <div class="empty"><div class="eico">🎉</div><div class="etxt">No hay tareas pendientes.</div></div>
+      </div>
+    </div>
+
+    <!-- S: LAB VIRTUAL -->
+    <div class="page" id="s-lab">
+      <div class="ptitle">Laboratorio Virtual</div>
+      <div class="psub">// Documentación técnica y materiales del módulo</div>
+      <div id="lab-materials" class="ga">
+        <div class="empty"><div class="eico">📂</div><div class="etxt">El docente aún no ha subido materiales.</div></div>
+      </div>
+    </div>
+
+    <!-- S: COMPONENTES -->
+    <div class="page" id="s-comp">
+      <div class="ptitle">Practica con tus Componentes</div>
+      <div class="psub">// Funcionamiento básico de cada pieza del módulo</div>
+      <div class="ga" id="comp-cards">
+        <!-- Contenido estático — componentes del módulo físico -->
+      </div>
+    </div>
+
+
+    <!-- ========================================================
+         PANEL DOCENTE — PÁGINAS
+         ======================================================== -->

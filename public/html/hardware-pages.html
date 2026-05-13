@@ -1,0 +1,92 @@
+<!-- H: EL MÓDULO -->
+    <div class="page" id="h-modulo" style="display:none">
+      <div class="ptitle">El Módulo de Electrotecnia</div>
+      <div class="psub">// Hardware físico — Ecosistema IPN de Aprendizaje Híbrido</div>
+      <div class="g2" style="margin-bottom:20px">
+        <div class="card">
+          <div style="font-size:48px;text-align:center;padding:20px;background:rgba(37,99,235,.05);border-radius:6px;margin-bottom:12px">🖥️</div>
+          <div class="card-t">Módulo Físico de Electrotecnia</div>
+          <div style="font-size:13px;color:var(--td);line-height:1.6;margin-top:8px">
+            Plataforma de aprendizaje práctico que conecta la teoría eléctrica con la implementación real. Incluye Arduino UNO, panel de LEDs, fuente de alimentación, resistencias y conectores integrados.
+          </div>
+        </div>
+        <div class="card">
+          <h3>Especificaciones</h3>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+            <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--b);padding-bottom:6px"><span style="color:var(--td)">Microcontrolador</span><span class="tag tc">Arduino UNO</span></div>
+            <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--b);padding-bottom:6px"><span style="color:var(--td)">Voltaje operación</span><span>5V / 12V</span></div>
+            <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--b);padding-bottom:6px"><span style="color:var(--td)">Pines digitales</span><span>14 (6 PWM)</span></div>
+            <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--b);padding-bottom:6px"><span style="color:var(--td)">Pines analógicos</span><span>6</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--td)">Conectividad</span><span>USB-B / UART</span></div>
+          </div>
+        </div>
+      </div>
+      <h3>Mapa de Componentes del Módulo</h3>
+      <div class="circuit">
+┌─────────────────────────────────────────────────────────────┐
+│  [ARDUINO UNO]    [FUENTE 12V]    [REGULADOR 5V]            │
+│       │                │                  │                  │
+│  ─────┼────────────────┼──────────────────┼──────────────   │
+│  [LED R][LED G][LED B]  [RESISTENCIAS]    [POTENCIÓMETRO]   │
+│  [BOTÓN 1][BOTÓN 2]     [PROTOBOARD]      [DISPLAY 7-SEG]   │
+│  [BUZZER]               [JUMPERS]         [SENSOR TEMP]     │
+└─────────────────────────────────────────────────────────────┘</div>
+    </div>
+
+    <!-- H: ARDUINO UNO -->
+    <div class="page" id="h-arduino" style="display:none">
+      <div class="ptitle">Arduino UNO</div>
+      <div class="psub">// Cerebro del módulo — documentación técnica</div>
+      <div class="g2">
+        <div class="card">
+          <div style="font-size:42px;text-align:center;margin-bottom:10px">🤖</div>
+          <div class="card-t">Arduino UNO R3</div>
+          <div style="font-size:13px;color:var(--td);line-height:1.6;margin:8px 0">
+            Microcontrolador ATmega328P. Integrado en el módulo físico del IPN para prácticas de circuitos digitales y analógicos.
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-family:var(--mono);margin-top:10px">
+            <div style="color:var(--a2)">// Pines PWM: 3, 5, 6, 9, 10, 11</div>
+            <div style="color:var(--a2)">// Analógicos: A0–A5</div>
+            <div style="color:var(--a2)">// Comunicación: UART, SPI, I2C</div>
+            <div style="color:var(--a3)">// Voltaje lógico: 5V</div>
+            <div style="color:var(--a3)">// Corriente máx. por pin: 40 mA</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Ejemplo — Blink básico</h3>
+          <div style="background:#020912;border-radius:6px;padding:14px;font-family:var(--mono);font-size:12px;line-height:1.9">
+            <div style="color:var(--tf)">// Primer programa: parpadeo del LED integrado</div>
+            <div style="color:var(--a2)">void <span style="color:var(--a3)">setup</span>() {</div>
+            <div style="color:var(--t);padding-left:16px">pinMode(<span style="color:var(--aw)">13</span>, OUTPUT);</div>
+            <div style="color:var(--a2)">}</div>
+            <div style="color:var(--a2)">void <span style="color:var(--a3)">loop</span>() {</div>
+            <div style="color:var(--t);padding-left:16px">digitalWrite(<span style="color:var(--aw)">13</span>, HIGH);</div>
+            <div style="color:var(--t);padding-left:16px">delay(<span style="color:var(--aw)">1000</span>);</div>
+            <div style="color:var(--t);padding-left:16px">digitalWrite(<span style="color:var(--aw)">13</span>, LOW);</div>
+            <div style="color:var(--t);padding-left:16px">delay(<span style="color:var(--aw)">1000</span>);</div>
+            <div style="color:var(--a2)">}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- H: COMPONENTES -->
+    <div class="page" id="h-componentes" style="display:none">
+      <div class="ptitle">Biblioteca de Componentes</div>
+      <div class="psub">// Todos los elementos del módulo físico</div>
+      <div class="ga" id="hw-comp-list"></div>
+    </div>
+
+    <!-- H: CIRCUITOS -->
+    <div class="page" id="h-circuitos" style="display:none">
+      <div class="ptitle">Circuitos Propuestos</div>
+      <div class="psub">// Practica directamente con el módulo físico</div>
+      <div style="display:flex;flex-direction:column;gap:18px" id="circuitos-list"></div>
+    </div>
+
+    <!-- H: CÓDIGO -->
+    <div class="page" id="h-codigo" style="display:none">
+      <div class="ptitle">Repositorio de Código</div>
+      <div class="psub">// Sketches Arduino de referencia — listos para cargar al módulo</div>
+      <div class="ga" id="code-list"></div>
+    </div>

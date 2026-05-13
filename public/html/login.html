@@ -1,0 +1,30 @@
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-brand">
+      <span class="bolt">⚡</span>
+      <h1>Electro-Lab Digital</h1>
+      <span class="sub">IPN — Módulo de Electrotecnia</span>
+    </div>
+
+    <div class="login-error" id="login-error">Correo o contraseña incorrectos.</div>
+
+    <div class="login-field">
+      <label>Correo institucional</label>
+      <input type="email" id="login-email" placeholder="usuario@ipn.mx"
+             onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+
+    <button class="btn bp btn-login" id="login-btn" onclick="doLogin()">
+      Iniciar Sesión
+    </button>
+
+    <div class="login-version">
+      Electro-Lab Digital v1.0 · IPN 2025
+    </div>
+  </div>
+</div>

@@ -1,20 +1,9 @@
-// ============================================================
-// server/routes/alumnos.js — Gestión de Alumnos
-// ============================================================
-// GET    /api/alumnos        → lista de alumnos activos
-// GET    /api/alumnos/:id    → un alumno por ID
-// POST   /api/alumnos        → inscribir alumno nuevo
-// PATCH  /api/alumnos/:id    → editar datos del alumno
-// DELETE /api/alumnos/:id    → dar de baja (soft delete)
-// ============================================================
-
 'use strict';
 
 const express = require('express');
 const router  = express.Router();
 const DB      = require('../db');
 
-// ── GET /api/alumnos ──────────────────────────────────────────
 router.get('/', async (req, res, next) => {
   try {
     const alumnos = await DB.getAlumnos();
@@ -24,7 +13,6 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// ── GET /api/alumnos/:id ──────────────────────────────────────
 router.get('/:id', async (req, res, next) => {
   try {
     const alumno = await DB.getAlumnoById(req.params.id);
@@ -35,12 +23,10 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// ── POST /api/alumnos — Inscribir alumno ──────────────────────
 router.post('/', async (req, res, next) => {
   try {
     const { name, email, matricula, group } = req.body;
 
-    // Validaciones
     if (!name?.trim()) {
       return res.status(400).json({ error: 'El nombre es obligatorio.' });
     }
@@ -48,7 +34,6 @@ router.post('/', async (req, res, next) => {
       return res.status(400).json({ error: 'La matrícula es obligatoria.' });
     }
 
-    // Verificar matrícula duplicada
     const existe = await DB.matriculaExists(matricula.trim());
     if (existe) {
       return res.status(409).json({ error: `La matrícula ${matricula} ya está registrada.` });
@@ -67,7 +52,6 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-// ── PATCH /api/alumnos/:id — Editar datos ────────────────────
 router.patch('/:id', async (req, res, next) => {
   try {
     const alumno = await DB.getAlumnoById(req.params.id);
@@ -86,9 +70,6 @@ router.patch('/:id', async (req, res, next) => {
   }
 });
 
-// ── DELETE /api/alumnos/:id — Dar de baja ────────────────────
-// No borra al alumno, solo marca active=false (soft delete).
-// Sus entregas se conservan en el historial.
 router.delete('/:id', async (req, res, next) => {
   try {
     const alumno = await DB.getAlumnoById(req.params.id);
