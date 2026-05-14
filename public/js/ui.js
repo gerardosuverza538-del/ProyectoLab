@@ -410,7 +410,7 @@ function renderEditorFileList() {
     </div>`).join('');
 }
 
-let _stepCount = 1;
+var _stepCount = 1;
 
 function addStep() {
   _stepCount++;
