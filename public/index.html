@@ -37,9 +37,6 @@
 
   <script>
 
-    // Compatibilidad:
-    // Como esta versión carga fragmentos HTML antes de cargar JS,
-    // algunos archivos antiguos que usen DOMContentLoaded aún deben ejecutarse.
     (function patchDOMContentLoaded() {
       const docAdd = document.addEventListener.bind(document);
       document.addEventListener = function(type, callback, options) {
@@ -98,8 +95,8 @@
         'js/quiz.js',
         'js/render.js',
         'js/editor.js',
-        'js/main.js',
-        'js/ui.js'
+        'js/main.js'
+        // 'js/ui.js'
       ];
 
       for (const src of scripts) {
