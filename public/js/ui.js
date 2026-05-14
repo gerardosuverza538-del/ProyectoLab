@@ -296,7 +296,7 @@ function populateMaterialSelects() {
       .map(p => `<option value="${p.id}">${p.num} — ${p.title}</option>`).join('');
 }
 
-let _pendingMaterialFile = null; 
+//let _pendingMaterialFile = null; 
 
 async function handleMaterialUpload(event) {
   await ElectroLab.handleFileInput(event, (record) => {
