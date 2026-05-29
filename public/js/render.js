@@ -204,17 +204,40 @@ async function renderStudentCount() {
 async function renderLabMaterials() {
   const el = document.getElementById('lab-materials');
   if (!el) return;
+
   try {
-    const mats  = await AppState.getMateriales();
-    const icons = { pdf:'📄', video:'🎥', code:'💾', image:'🖼️', other:'📁' };
+    AppState.invalidate('materiales');
+
+    const raw = await AppState.getMateriales();
+
+    const mats = raw.map(m => ({
+      ...m,
+      fileUrl: m.fileUrl || m.file_url,
+      uploadedAt: m.uploadedAt || m.uploaded_at,
+      sizeBytes: m.sizeBytes || m.size_bytes,
+    }));
+
+    const icons = {
+      pdf: '📄',
+      video: '🎥',
+      code: '💾',
+      image: '🖼️',
+      other: '📁',
+    };
+
     el.innerHTML = mats.length === 0
       ? '<div class="empty"><div class="eico">📂</div><div class="etxt">El docente aún no ha subido materiales.</div></div>'
       : mats.map(m => `
           <div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer" onclick="window.open('${m.fileUrl}','_blank')">
-            <div style="font-size:32px;flex-shrink:0">${icons[m.category]||'📁'}</div>
-            <div style="flex:1"><div class="card-t">${m.name}</div><div style="color:var(--td);font-size:12px;margin-top:3px">${formatDate(m.uploadedAt)}</div></div>
-            <span class="tag tb">${m.ext?.toUpperCase()}</span>
-          </div>`).join('');
+            <div style="font-size:32px;flex-shrink:0">${icons[m.category] || '📁'}</div>
+            <div style="flex:1">
+              <div class="card-t">${m.name}</div>
+              <div style="color:var(--td);font-size:12px;margin-top:3px">${formatDate(m.uploadedAt)}</div>
+            </div>
+            <span class="tag tb">${(m.ext || '').toUpperCase()}</span>
+          </div>
+        `).join('');
+
   } catch (err) {
     el.innerHTML = `<div class="empty"><div class="eico">⚠️</div><div class="etxt">Error: ${err.message}</div></div>`;
   }
