@@ -17,8 +17,23 @@ const PERMISSIONS = {
   },
 };
 
+function getCurrentUserSafe() {
+  if (AppState.currentUser) return AppState.currentUser;
+
+  try {
+    const saved = JSON.parse(localStorage.getItem('electro_user') || '{}');
+    if (saved && saved.role) {
+      AppState.currentUser = saved;
+      return saved;
+    }
+  } catch (_) {}
+
+  return null;
+}
+
 function can(action) {
-  const role = AppState.currentUser?.role;
+  const user = getCurrentUserSafe();
+  const role = user?.role;
   if (!role) return false;
   return PERMISSIONS[role]?.[action] ?? false;
 }
@@ -28,6 +43,7 @@ function requirePermission(action) {
     notify('No tienes permiso para realizar esta acción.', 'error');
     throw new Error(`Permiso denegado: ${action}`);
   }
+  return true;
 }
 
 const AppState = {
@@ -42,19 +58,34 @@ const AppState = {
 
   setUser(user) {
     this.currentUser = user;
+
     const avEl = document.getElementById('av-initials');
     const rlEl = document.getElementById('role-label');
+
     if (avEl) avEl.textContent = user?.initials || user?.name?.[0] || '?';
     if (rlEl) rlEl.textContent = user?.name || '—';
   },
 
   async getPracticas() {
-    if (!this._cache.practicas) {
-      const role = this.currentUser?.role || 'student';
-      this._cache.practicas = await API.practicas.getAll(role);
-    }
-    return this._cache.practicas;
-  },
+  if (!this._cache.practicas) {
+    const user = getCurrentUserSafe();
+    const role = user?.role || 'student';
+
+    const data = await API.practicas.getAll(role);
+
+    this._cache.practicas = data.map(p => ({
+      ...p,
+      deliveryType: p.deliveryType || p.delivery_type,
+      circuitDiagram: p.circuitDiagram || p.circuit_diagram,
+      codeSnippet: p.codeSnippet || p.code_snippet,
+      createdBy: p.createdBy || p.created_by,
+      createdAt: p.createdAt || p.created_at,
+      updatedAt: p.updatedAt || p.updated_at,
+    }));
+  }
+
+  return this._cache.practicas;
+},
 
   async getPublishedPracticas() {
     const all = await this.getPracticas();
@@ -88,3 +119,7 @@ const AppState = {
     return this._cache.materiales;
   },
 };
+
+window.AppState = AppState;
+window.can = can;
+window.requirePermission = requirePermission;

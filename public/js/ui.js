@@ -119,6 +119,7 @@ function doLogout() {
 }
 
 function activatePanel(user) {
+  if (window.AppState) AppState.setUser(user);
   document.getElementById('role-label').textContent  = user.name;
   document.getElementById('av-initials').textContent =
     user.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
@@ -296,134 +297,6 @@ function populateMaterialSelects() {
       .map(p => `<option value="${p.id}">${p.num} — ${p.title}</option>`).join('');
 }
 
-var _pendingMaterialFile = null; 
-
-async function handleMaterialUpload(event) {
-  await ElectroLab.handleFileInput(event, (record) => {
-    _pendingMaterialFile = record;
-  }, 'material');
-}
-
-function saveMaterial() {
-  if (!_pendingMaterialFile) {
-    ElectroLab.notify('Primero selecciona un archivo.', 'error');
-    return;
-  }
-  const title    = document.getElementById('mat-title')?.value?.trim() || _pendingMaterialFile.name;
-  const category = document.getElementById('mat-category')?.value || 'pdf';
-  const practiceId = document.getElementById('mat-practice')?.value || null;
-
-  ElectroLab.AppState.addMaterial(_pendingMaterialFile, { category, practiceId });
-  _pendingMaterialFile = null;
-
-  if (document.getElementById('mat-title')) document.getElementById('mat-title').value = '';
-  resetDropZoneById('mat-drop');
-  renderMaterialList();
-  renderLabMaterials();
-}
-
-function resetDropZoneById(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.innerHTML = `
-    <input type="file" id="mat-file-input"
-           accept=".pdf,.ino,image/jpeg,image/png,video/mp4,video/quicktime"
-           onchange="handleMaterialUpload(event)">
-    <div style="font-size:32px;margin-bottom:8px">📤</div>
-    <div style="font-family:var(--mono);font-size:12px;color:var(--td)">Arrastra el archivo aquí</div>
-    <div style="font-size:11px;color:var(--tf);margin-top:4px">PDF · .ino · PNG · JPG · MP4 · máx. 50 MB</div>`;
-}
-
-function renderMaterialList() {
-  const el = document.getElementById('mat-list');
-  if (!el) return;
-  const mats = ElectroLab.AppState.materials;
-  if (mats.length === 0) {
-    el.innerHTML = '<div class="empty"><div class="eico">📂</div><div class="etxt">Sin materiales subidos todavía.</div></div>';
-    return;
-  }
-  el.innerHTML = mats.map(m => {
-    const icons = { pdf:'📄', video:'🎥', code:'💾', image:'🖼️', other:'📁' };
-    return `
-      <div style="display:flex;align-items:center;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px solid var(--b)">
-        <span style="font-size:18px">${icons[m.category] || '📁'}</span>
-        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.name}</span>
-        <span class="tag tb">${m.ext.toUpperCase()}</span>
-        <button class="btn bg btn-sm"
-          onclick="ElectroLab.AppState.materials.splice(ElectroLab.AppState.materials.findIndex(x=>x.id==='${m.id}'),1);renderMaterialList()">✕</button>
-      </div>`;
-  }).join('');
-}
-
-function renderLabMaterials() {
-  const el = document.getElementById('lab-materials');
-  if (!el) return;
-  const mats = ElectroLab.AppState.materials;
-  if (mats.length === 0) {
-    el.innerHTML = '<div class="empty"><div class="eico">📂</div><div class="etxt">El docente aún no ha subido materiales.</div></div>';
-    return;
-  }
-  const icons = { pdf:'📄', video:'🎥', code:'💾', image:'🖼️', other:'📁' };
-  el.innerHTML = mats.map(m => `
-    <div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer"
-         onclick="downloadMaterial('${m.id}')">
-      <div style="font-size:32px;flex-shrink:0">${icons[m.category] || '📁'}</div>
-      <div style="flex:1">
-        <div class="card-t">${m.name}</div>
-        <div style="color:var(--td);font-size:12px;margin-top:3px">${ElectroLab.formatDate(m.uploadedAt)}</div>
-      </div>
-      <span class="tag tb">${m.ext.toUpperCase()}</span>
-    </div>`).join('');
-}
-
-function downloadMaterial(matId) {
-  const m = ElectroLab.AppState.materials.find(x => x.id === matId);
-  if (!m) return;
-  const a = document.createElement('a');
-  a.href     = m.dataUrl;
-  a.download = m.name;
-  a.click();
-}
-
-var _editorFiles = []; 
-
-async function handleEditorFiles(event) {
-  const files = [...(event.target.files || [])];
-  for (const file of files) {
-    try {
-      const record = await ElectroLab.validateAndReadFile(file, 'material');
-      _editorFiles.push(record);
-      renderEditorFileList();
-    } catch (_) { /* validación ya notificada */ }
-  }
-}
-
-function renderEditorFileList() {
-  const el = document.getElementById('editor-file-list');
-  if (!el) return;
-  el.innerHTML = _editorFiles.map((f, i) => `
-    <div style="display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 0;border-bottom:1px solid var(--b)">
-      <span>📎</span>
-      <span style="flex:1;overflow:hidden;text-overflow:ellipsis">${f.name}</span>
-      <span style="font-family:var(--mono);color:var(--tf)">${ElectroLab.formatBytes(f.sizeBytes)}</span>
-      <button class="btn bg btn-sm" onclick="_editorFiles.splice(${i},1);renderEditorFileList()">✕</button>
-    </div>`).join('');
-}
-
-var _stepCount = 1;
-
-function addStep() {
-  _stepCount++;
-  const container = document.getElementById('ed-steps');
-  const row = document.createElement('div');
-  row.className = 'step-row';
-  row.style.cssText = 'display:flex;gap:8px;align-items:flex-start';
-  row.innerHTML = `
-    <span class="tag tc" style="flex-shrink:0;margin-top:8px">${String(_stepCount).padStart(2,'0')}</span>
-    <textarea placeholder="Paso ${_stepCount}…" style="flex:1;min-height:56px"></textarea>
-    <button class="btn bg btn-sm" style="margin-top:8px" onclick="this.parentElement.remove()">✕</button>`;
-  container.appendChild(row);
-}
 
 function addCustomComponent() {
   const name = prompt('Nombre del componente:');
@@ -531,40 +404,7 @@ function renderHardwarePages() {
     </div>`).join('');
 }
 
-function buildPracticeCardHTML(p) {
-  const state = ElectroLab.AppState;
-  const subs  = state.getStudentSubmissions(state.currentUser?.id || 'stu-001');
-  const submitted = subs.some(s => s.practiceId === p.id);
-  const stars = '⭐'.repeat(p.difficulty) + '☆'.repeat(3 - p.difficulty);
-  const statusTag = submitted
-    ? '<span class="tag tg">✓ Entregada</span>'
-    : '<span class="tag tw">Pendiente</span>';
 
-  return `
-    <div class="pcard" onclick="openPrac('${p.id}')">
-      <div class="pch">
-        <span class="pnum">${p.num}</span>
-        <div class="pt">${p.title}</div>
-      </div>
-      <div class="pb2">${p.objective?.substring(0, 100) || ''}${p.objective?.length > 100 ? '…' : ''}</div>
-      <div class="pf">
-        <span style="color:var(--aw);font-size:12px">${stars}</span>
-        ${statusTag}
-      </div>
-    </div>`;
-}
-
-const _origRenderStudentPractices = ElectroLab.renderStudentPractices;
-ElectroLab.renderStudentPractices = function() {
-  const container = document.getElementById('prac-list');
-  if (!container) return;
-  const published = ElectroLab.AppState.getPublishedPractices();
-  if (published.length === 0) {
-    container.innerHTML = '<div class="empty"><div class="eico">📭</div><div class="etxt">Aún no hay prácticas publicadas.</div><div class="esub">Tu maestro las irá subiendo.</div></div>';
-  } else {
-    container.innerHTML = published.map(p => buildPracticeCardHTML(p)).join('');
-  }
-};
 
 function initElectroLabUI() {
   renderHardwarePages();
@@ -634,3 +474,9 @@ async function submitEnrollForm() {
     ElectroLab.notify(err.message, 'error');
   }
 }
+
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+window.activatePanel = activatePanel;
+window.setPanel = setPanel;
+window.showPage = showPage;

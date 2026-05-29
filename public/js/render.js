@@ -15,17 +15,40 @@ async function renderStudentPractices() {
 }
 
 async function buildPracticeCardHTML(p) {
-  const myId = AppState.currentUser?.id || '';
-  const subs = myId ? await AppState.getStudentSubmissions(myId) : [];
-  const done = subs.some(s => s.practiceId === p.id);
-  const stars = '⭐'.repeat(p.difficulty || 1) + '☆'.repeat(3 - (p.difficulty || 1));
+	const myId = '';
+
+  const subsRaw = myId
+    ? await AppState.getStudentSubmissions(myId)
+    : [];
+
+  const subs = Array.isArray(subsRaw) ? subsRaw : [];
+
+  const done = subs.some(
+    s => (s.practiceId || s.practice_id) === p.id
+  );
+
+  const stars = '⭐'.repeat(p.difficulty || 1) +
+                '☆'.repeat(3 - (p.difficulty || 1));
+
   return `
     <div class="pcard" onclick="openPrac('${p.id}')">
-      <div class="pch"><span class="pnum">${p.num}</span><div class="pt">${p.title}</div></div>
-      <div class="pb2">${(p.objective||'').substring(0,100)}${(p.objective||'').length>100?'…':''}</div>
+      <div class="pch">
+        <span class="pnum">${p.num}</span>
+        <div class="pt">${p.title}</div>
+      </div>
+
+      <div class="pb2">
+        ${(p.objective || '').substring(0,100)}
+        ${(p.objective || '').length > 100 ? '…' : ''}
+      </div>
+
       <div class="pf">
         <span style="color:var(--aw);font-size:12px">${stars}</span>
-        ${done ? '<span class="tag tg">✓ Entregada</span>' : '<span class="tag tw">Pendiente</span>'}
+        ${
+          done
+            ? '<span class="tag tg">✓ Entregada</span>'
+            : '<span class="tag tw">Pendiente</span>'
+        }
       </div>
     </div>`;
 }
@@ -64,8 +87,8 @@ async function renderStudentTasks() {
   el.innerHTML = '<div class="empty"><div class="eico">⏳</div><div class="etxt">Cargando tareas…</div></div>';
   try {
     const pub        = await AppState.getPublishedPracticas();
-    const myId       = AppState.currentUser?.id || '';
-    const mySubs     = myId ? await AppState.getStudentSubmissions(myId) : [];
+    const myId       = '';
+    const mySubs     = [];
     const submittedP = new Set(mySubs.map(s => `${s.practiceId}:${s.type}`));
     const pending    = pub.filter(p => {
       if (p.deliveryType === 'both') return !submittedP.has(`${p.id}:photo`) || !submittedP.has(`${p.id}:quiz`);
