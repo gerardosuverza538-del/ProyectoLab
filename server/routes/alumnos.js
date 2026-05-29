@@ -25,7 +25,7 @@ router.get('/:id', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    const { name, email, matricula, group } = req.body;
+const { name, email, matricula, group, password } = req.body;
 
     if (!name?.trim()) {
       return res.status(400).json({ error: 'El nombre es obligatorio.' });
@@ -44,6 +44,7 @@ router.post('/', async (req, res, next) => {
       email:     email?.trim()     || '',
       matricula: matricula.trim(),
       group:     group?.trim()     || 'G1',
+      password: password?.trim() || '1234',
     });
 
     res.status(201).json(alumno);

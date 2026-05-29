@@ -45,7 +45,7 @@ const DB = {
         data.codeSnippet || '',
         data.quiz ? JSON.stringify(data.quiz) : null,
         data.status || 'draft',
-        data.createdBy || '',
+        null,
       ]
     );
     return rows[0];
@@ -104,18 +104,19 @@ const DB = {
   },
 
   createAlumno: async (data) => {
-    const { rows } = await pool.query(
-      `INSERT INTO alumnos (name, email, matricula, grp)
-       VALUES ($1,$2,$3,$4)
-       RETURNING *`,
-      [
-        data.name,
-        data.email || '',
-        data.matricula,
-        data.group || 'G1',
-      ]
-    );
-    return rows[0];
+  const { rows } = await pool.query(
+    `INSERT INTO alumnos (name, email, matricula, grp, password)
+     VALUES ($1,$2,$3,$4,$5)
+     RETURNING *`,
+    [
+      data.name,
+      data.email || '',
+      data.matricula,
+      data.group || 'G1',
+      data.password || '1234',
+    ]
+  );
+  return rows[0];
   },
 
   updateAlumno: async (id, changes) => {
@@ -231,7 +232,7 @@ const DB = {
         data.sizeBytes,
         data.category,
         data.practiceId || null,
-        data.uploadedBy || '',
+        null,
         data.fileUrl,
       ]
     );
