@@ -15,13 +15,13 @@ const CONFIG = {
     'application/octet-stream': '.*',
   },
 
-  ALLOWED_PHOTO_TYPES: {
-    'image/jpeg': '.jpg',
-    'image/png':  '.png',
-    'image/webp': '.webp',
-    'image/heic': '.heic',
+ ALLOWED_PHOTO_TYPES: {
+  'image/jpeg':      '.jpg',
+  'image/png':       '.png',
+  'image/webp':      '.webp',
+  'image/heic':      '.heic',
+  'application/pdf': '.pdf',
   },
-
   ALLOWED_EXTENSIONS: [
     '.pdf', '.mp4', '.mov',
     '.jpg', '.jpeg', '.png', '.webp', '.heic',

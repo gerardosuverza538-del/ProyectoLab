@@ -120,10 +120,10 @@ async function renderStudentTasks() {
           <div style="margin-top:10px;border-top:1px solid var(--b);padding-top:14px">
             <div style="font-family:var(--mono);font-size:10px;color:var(--tf);margin-bottom:10px;letter-spacing:.08em">ENTREGA DE FOTO</div>
             <div class="drop" data-context="photo" data-practice="${p.id}" onclick="this.querySelector('input').click()">
-              <input type="file" accept="image/jpeg,image/png,image/webp,.heic" onchange="handlePhotoUpload(event,'${p.id}')">
+	      <input type="file" accept="image/jpeg,image/png,image/webp,.heic,application/pdf" onchange="handlePhotoUpload(event,'${p.id}')">
               <div style="font-size:24px;margin-bottom:6px">📷</div>
               <div style="font-family:var(--mono);font-size:12px;color:var(--td)">Sube foto del circuito armado</div>
-              <div style="font-size:11px;color:var(--tf);margin-top:4px">JPG · PNG · WEBP · máx. 10 MB</div>
+              <div style="font-size:11px;color:var(--tf);margin-top:4px">JPG · PNG · WEBP · PDF · máx. 10 MB</div>
             </div>
           </div>` : ''}
       </div>`).join('');
@@ -135,25 +135,67 @@ async function renderStudentTasks() {
 async function renderPendingSubmissions() {
   const el = document.getElementById('foro-entregas');
   if (!el) return;
+
   try {
-    const pending = await AppState.getPendingGrading();
-    const pracs   = await AppState.getPracticas();
-    if (!pending.length) { el.innerHTML = '<div class="empty"><div class="eico">✅</div><div class="etxt">Todas las entregas están calificadas.</div></div>'; return; }
+    const rawPending = await AppState.getPendingGrading();
+    const pending = Array.isArray(rawPending) ? rawPending : [];
+
+    const pracs = await AppState.getPracticas();
+    const alumnos = await AppState.getAlumnos();
+
+    if (!pending.length) {
+      el.innerHTML = '<div class="empty"><div class="eico">✅</div><div class="etxt">Todas las entregas están calificadas.</div></div>';
+      return;
+    }
+
     el.innerHTML = pending.map(s => {
-      const p    = pracs.find(x => x.id === s.practiceId);
-      const date = new Date(s.submittedAt).toLocaleDateString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+      const practiceId = s.practiceId || s.practice_id;
+      const studentId = s.studentId || s.student_id;
+      const fileUrl = s.fileUrl || s.file_url;
+      const submittedAt = s.submittedAt || s.submitted_at;
+      const quizScore = s.quizScore || s.quiz_score;
+
+      const p = pracs.find(x => x.id === practiceId);
+      const alumno = alumnos.find(a => a.id === studentId);
+
+      const studentName =
+        s.studentName ||
+        s.student_name ||
+        alumno?.name ||
+        'Alumno';
+
+      const date = submittedAt
+        ? new Date(submittedAt).toLocaleDateString('es-MX', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        : 'Sin fecha';
+
       return `
         <div class="fpost" onclick="selectSubmission('${s.id}')">
           <div class="fau">
-            <div class="fav stu">${(s.studentName||'?')[0]}</div>
-            <div><div class="fname">${s.studentName}</div><div class="ftime">${p?.num||''} ${p?.title||''} · ${date}</div></div>
+            <div class="fav stu">${(studentName || '?')[0]}</div>
+
+            <div>
+              <div class="fname">${studentName}</div>
+              <div class="ftime">${p?.num || ''} ${p?.title || 'Práctica'} · ${date}</div>
+            </div>
+
             <span class="tag tw" style="margin-left:auto">Pendiente</span>
           </div>
+
           <div style="font-size:12px;color:var(--td)">
-            ${s.type==='photo' ? `📷 <a href="${s.fileUrl}" target="_blank" style="color:var(--a2)">Ver foto</a>` : `📝 Quiz: ${s.quizScore}/${p?.quiz?.length??'?'}`}
+            ${
+              s.type === 'photo'
+                ? `📎 <a href="${fileUrl}" target="_blank" style="color:var(--a2)">Ver archivo</a>`
+                : `📝 Quiz: ${quizScore}/${p?.quiz?.length ?? '?'}`
+            }
           </div>
         </div>`;
     }).join('');
+
   } catch (err) {
     el.innerHTML = `<div class="empty"><div class="eico">⚠️</div><div class="etxt">Error: ${err.message}</div></div>`;
   }
@@ -167,38 +209,101 @@ async function renderStudentList() {
     const pracs   = await AppState.getPublishedPracticas();
     if (!alumnos.length) { el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--td);font-family:var(--mono);font-size:12px">Sin alumnos inscritos todavía.</td></tr>`; return; }
     const rows = await Promise.all(alumnos.map(async s => {
-      const subs   = await AppState.getStudentSubmissions(s.id);
-      const graded = subs.filter(x => x.grade != null);
-      const avg    = graded.length ? (graded.reduce((a,b) => a+b.grade,0)/graded.length).toFixed(1) : '—';
-      const status = !pracs.length ? 'Sin prácticas' : subs.length >= pracs.length ? 'Al corriente' : subs.length > 0 ? 'Pendiente' : 'Sin entregas';
-      return `
-        <tr style="border-bottom:1px solid var(--b)">
-          <td style="padding:10px 8px">
-            <div style="display:flex;align-items:center;gap:8px">
-              <div class="av" style="width:26px;height:26px;font-size:10px">${(s.name||'?').split(' ').map(x=>x[0]).join('')}</div>
-              <div><div style="font-size:13px">${s.name}</div><div style="font-size:11px;color:var(--tf);font-family:var(--mono)">${s.matricula||''}</div></div>
+  let subs = [];
+
+  try {
+    const rawSubs = await AppState.getStudentSubmissions(s.id);
+    subs = Array.isArray(rawSubs) ? rawSubs : [];
+  } catch (_) {
+    subs = [];
+  }
+
+  const graded = subs.filter(x => x.grade != null);
+
+  const avg = graded.length
+    ? (graded.reduce((a, b) => a + Number(b.grade || 0), 0) / graded.length).toFixed(1)
+    : '—';
+
+  const status = !pracs.length
+    ? 'Sin prácticas'
+    : subs.length >= pracs.length
+      ? 'Al corriente'
+      : subs.length > 0
+        ? 'Pendiente'
+        : 'Sin entregas';
+
+  return `
+    <tr style="border-bottom:1px solid var(--b)">
+      <td style="padding:10px 8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="av" style="width:26px;height:26px;font-size:10px">
+            ${(s.name || '?').split(' ').map(x => x[0]).join('')}
+          </div>
+
+          <div>
+            <div style="font-size:13px">${s.name || 'Alumno'}</div>
+            <div style="font-size:11px;color:var(--tf);font-family:var(--mono)">
+              ${s.matricula || ''}
             </div>
-          </td>
-          <td style="padding:10px 8px;font-size:12px;color:var(--td)">${s.group||'—'}</td>
-          <td style="padding:10px 8px;font-size:12px;color:var(--td)">${s.email||'—'}</td>
-          <td style="padding:10px 8px;font-family:var(--mono);font-size:12px">${subs.length}/${pracs.length}</td>
-          <td style="padding:10px 8px;font-family:var(--mono);font-size:12px;color:var(--a3)">${avg}</td>
-          <td style="padding:10px 8px">
-            <span class="tag ${status==='Al corriente'?'tg':status==='Pendiente'?'tw':'tr'}" style="margin-bottom:4px">${status}</span><br>
-            <button class="btn bg btn-sm" style="margin-top:4px" onclick="removeStudent('${s.id}').then(()=>{renderStudentList();renderStudentCount()})">Dar de baja</button>
-          </td>
-        </tr>`;
-    }));
+          </div>
+        </div>
+      </td>
+
+      <td style="padding:10px 8px;font-size:12px;color:var(--td)">
+        ${s.group || s.grp || '—'}
+      </td>
+
+      <td style="padding:10px 8px;font-size:12px;color:var(--td)">
+        ${s.email || '—'}
+      </td>
+
+      <td style="padding:10px 8px;font-family:var(--mono);font-size:12px">
+        ${subs.length}/${pracs.length}
+      </td>
+
+      <td style="padding:10px 8px;font-family:var(--mono);font-size:12px;color:var(--a3)">
+        ${avg}
+      </td>
+
+      <td style="padding:10px 8px">
+        <span class="tag ${status === 'Al corriente' ? 'tg' : status === 'Pendiente' ? 'tw' : 'tr'}" style="margin-bottom:4px">
+          ${status}
+        </span>
+        <br>
+
+        <button
+          class="btn bg btn-sm"
+          style="margin-top:4px"
+          onclick="removeStudent('${s.id}').then(() => { renderStudentList(); renderStudentCount(); })"
+        >
+          Dar de baja
+        </button>
+      </td>
+    </tr>`;
+}));
     el.innerHTML = rows.join('');
+    
+    document.querySelectorAll('#t-student-count').forEach(countEl => {
+  countEl.textContent = alumnos.length;
+	});
   } catch (err) {
     el.innerHTML = `<tr><td colspan="6" style="padding:20px;color:var(--ar)">Error: ${err.message}</td></tr>`;
   }
 }
 
 async function renderStudentCount() {
-  const el = document.getElementById('t-student-count');
-  if (!el) return;
-  try { el.textContent = (await AppState.getAlumnos()).length; } catch (_) { el.textContent = '?'; }
+  try {
+    const alumnos = await AppState.getAlumnos();
+    const total = alumnos.length;
+
+    document.querySelectorAll('#t-student-count').forEach(el => {
+      el.textContent = total;
+    });
+  } catch (_) {
+    document.querySelectorAll('#t-student-count').forEach(el => {
+      el.textContent = '?';
+    });
+  }
 }
 
 async function renderLabMaterials() {
@@ -266,12 +371,106 @@ async function renderMaterialList() {
 async function populateForumSelects() {
   try {
     const alumnos = await AppState.getAlumnos();
-    const pracs   = await AppState.getPublishedPracticas();
-    const stuSel  = document.getElementById('foro-student');
+    const pracs = await AppState.getPublishedPracticas();
+
+    const stuSel = document.getElementById('foro-student');
     const pracSel = document.getElementById('foro-practice');
-    if (stuSel)  stuSel.innerHTML  = alumnos.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-    if (pracSel) pracSel.innerHTML = '<option value="">— Selecciona —</option>' + pracs.map(p => `<option value="${p.id}">${p.num} — ${p.title}</option>`).join('');
-  } catch (_) {}
+
+    if (stuSel) {
+      stuSel.innerHTML = alumnos.length === 0
+        ? '<option value="">— No hay alumnos inscritos —</option>'
+        : '<option value="">— Selecciona alumno —</option>' +
+          alumnos.map(s => `
+            <option value="${s.id}">
+              ${s.name} ${s.matricula ? `(${s.matricula})` : ''}
+            </option>
+          `).join('');
+
+      stuSel.onchange = selectSubmissionFromSelectors;
+    }
+
+    if (pracSel) {
+      pracSel.innerHTML = pracs.length === 0
+        ? '<option value="">— No hay prácticas publicadas —</option>'
+        : '<option value="">— Selecciona práctica —</option>' +
+          pracs.map(p => `
+            <option value="${p.id}">
+              ${p.num} — ${p.title}
+            </option>
+          `).join('');
+
+      pracSel.onchange = selectSubmissionFromSelectors;
+    }
+
+  } catch (err) {
+    console.error('Error al llenar selects del foro:', err);
+  }
+}
+
+async function selectSubmissionFromSelectors() {
+  const stuSel = document.getElementById('foro-student');
+  const pracSel = document.getElementById('foro-practice');
+  const idField = document.getElementById('foro-submission-id');
+
+  if (!stuSel || !pracSel || !idField) return;
+
+  const studentId = stuSel.value;
+  const practiceId = pracSel.value;
+
+  idField.value = '';
+
+  if (!studentId || !practiceId) return;
+
+  try {
+    const raw = await AppState.getEntregas({ studentId, practiceId });
+    const entregas = Array.isArray(raw) ? raw : [];
+
+    const pendiente = entregas.find(e => e.grade === null || e.grade === undefined);
+
+    if (!pendiente) {
+      notify('No hay entrega pendiente para ese alumno y práctica.', 'warn');
+      return;
+    }
+
+    idField.value = pendiente.id;
+    notify('Entrega seleccionada automáticamente.', 'info');
+
+  } catch (err) {
+    notify(err.message || 'No se pudo buscar la entrega.', 'error');
+  }
+}
+
+async function selectSubmissionFromSelectors() {
+  const stuSel = document.getElementById('foro-student');
+  const pracSel = document.getElementById('foro-practice');
+  const idField = document.getElementById('foro-submission-id');
+
+  if (!stuSel || !pracSel || !idField) return;
+
+  const studentId = stuSel.value;
+  const practiceId = pracSel.value;
+
+  idField.value = '';
+
+  if (!studentId || !practiceId) return;
+
+  try {
+    const entregasRaw = await AppState.getEntregas({ studentId, practiceId });
+    const entregas = Array.isArray(entregasRaw) ? entregasRaw : [];
+
+    const pendiente = entregas.find(e => e.grade === null || e.grade === undefined);
+
+    if (!pendiente) {
+      notify('No hay entrega pendiente para ese alumno y práctica.', 'warn');
+      return;
+    }
+
+    idField.value = pendiente.id;
+    notify('Entrega seleccionada automáticamente.', 'info');
+
+  } catch (err) {
+    notify(err.message || 'No se pudo buscar la entrega.', 'error');
+  }
 }
 
 async function populateMaterialSelects() {

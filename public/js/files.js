@@ -27,29 +27,55 @@ function validateFile(file, context = 'material') {
 async function handlePhotoUpload(event, practiceId) {
   const file = event.target.files?.[0];
   if (!file) return;
+
   const dz = event.target.closest('.drop');
 
-  if (!validateFile(file, 'photo')) { if (dz) setDropZoneError(dz); return; }
+  if (!validateFile(file, 'photo')) {
+    if (dz) setDropZoneError(dz);
+    return;
+  }
+
   if (dz) setDropZoneLoading(dz, file.name);
 
   try {
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+
     const saved = await API.materiales.create(file, {
-      name: file.name, category: 'image', practiceId: null,
+      name: file.name,
+      category: isPdf ? 'pdf' : 'image',
+      practiceId: null,
       uploadedBy: AppState.currentUser?.id,
     });
+
+    const fileUrl = saved.fileUrl || saved.file_url;
+
+    if (!fileUrl) {
+      throw new Error('No se recibió URL del archivo subido.');
+    }
+
     if (dz) setDropZoneSuccess(dz, file.name, file.size);
-    await submitWork({ practiceId, type: 'photo', fileUrl: saved.fileUrl });
+
+    await submitWork({
+      practiceId,
+      type: 'photo',
+      fileUrl,
+    });
+
     setTimeout(() => {
       const card = document.getElementById(`task-card-${practiceId}`);
       if (card) {
         card.style.opacity = '0.5';
         card.style.pointerEvents = 'none';
-        card.insertAdjacentHTML('afterbegin', '<div class="tag tg" style="display:inline-flex;margin-bottom:10px">✓ Entregado — esperando calificación</div>');
+        card.insertAdjacentHTML(
+          'afterbegin',
+          '<div class="tag tg" style="display:inline-flex;margin-bottom:10px">✓ Entregado — esperando calificación</div>'
+        );
       }
     }, 600);
+
   } catch (err) {
     if (dz) setDropZoneError(dz);
-    notify(err.message || 'Error al subir la foto.', 'error');
+    notify(err.message || 'Error al subir la entrega.', 'error');
   }
 }
 
@@ -87,7 +113,7 @@ function setDropZoneError(el) {
 function resetDropZoneEl(el) {
   const ctx  = el.dataset.context || 'material';
   const lim  = ctx === 'photo' ? CONFIG.MAX_PHOTO_SIZE_MB : CONFIG.MAX_FILE_SIZE_MB;
-  const exts = ctx === 'photo' ? 'JPG · PNG · WEBP · HEIC' : 'PDF · .ino · Imágenes · Video';
+  const exts = ctx === 'photo' ? 'JPG · PNG · WEBP · HEIC · PDF' : 'PDF · .ino · Imágenes · Video';
   el.innerHTML = `<input type="file" style="display:none"><div style="font-size:28px;margin-bottom:8px">📁</div><div style="font-family:var(--mono);font-size:12px;color:var(--td)">Arrastra o haz clic</div><div style="font-size:11px;color:var(--tf);margin-top:4px">${exts} · máx. ${lim} MB</div>`;
 }
 

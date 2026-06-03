@@ -122,10 +122,35 @@ async function submitGradeFromForum() {
   });
 }
 
-function selectSubmission(submissionId) {
+async function selectSubmission(submissionId) {
   const idField = document.getElementById('foro-submission-id');
   if (idField) idField.value = submissionId;
-  notify('Entrega seleccionada. Escribe la calificación y envía.', 'info');
+
+  try {
+    const raw = await AppState.getEntregas();
+    const entregas = Array.isArray(raw) ? raw : [];
+
+    const entrega = entregas.find(e => e.id === submissionId);
+
+    if (!entrega) {
+      notify('Entrega seleccionada.', 'info');
+      return;
+    }
+
+    const studentId = entrega.studentId || entrega.student_id;
+    const practiceId = entrega.practiceId || entrega.practice_id;
+
+    const stuSel = document.getElementById('foro-student');
+    const pracSel = document.getElementById('foro-practice');
+
+    if (stuSel && studentId) stuSel.value = studentId;
+    if (pracSel && practiceId) pracSel.value = practiceId;
+
+    notify('Entrega seleccionada. Escribe la calificación y envía.', 'info');
+
+  } catch (_) {
+    notify('Entrega seleccionada. Escribe la calificación y envía.', 'info');
+  }
 }
 
 let _pendingMaterialFile = null;

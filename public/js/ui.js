@@ -218,85 +218,100 @@ function refreshStudentDashboard() {
   }
 }
 
-function refreshTeacherDashboard() {
-  const state    = ElectroLab.AppState;
-  const pending  = state.getPendingGrading();
-  const published = state.getPublishedPractices();
+async function refreshTeacherDashboard() {
+  const user = AppState.currentUser || JSON.parse(localStorage.getItem('electro_user') || '{}');
 
-  document.getElementById('teacher-subtitle').textContent =
-    `// ${state.currentUser?.name || 'Docente'} — Electrotecnia IPN`;
+  const pracs = await AppState.getPracticas();
+  const published = pracs.filter(p => p.status === 'published');
 
-  document.getElementById('t-total-pracs').textContent   = state.practices.length;
-  document.getElementById('t-published').textContent     = published.length;
-  document.getElementById('t-pending-grade').textContent = pending.length;
+  const alumnos = await AppState.getAlumnos();
+
+  let entregas = [];
+  try {
+    const raw = await AppState.getEntregas();
+    entregas = Array.isArray(raw) ? raw : [];
+  } catch (_) {
+    entregas = [];
+  }
+
+  const pending = entregas.filter(e => e.grade === null || e.grade === undefined);
+
+  const subtitle = document.getElementById('teacher-subtitle');
+  if (subtitle) {
+    subtitle.textContent = `// ${user?.name || 'Docente'} — Electrotecnia IPN`;
+  }
+
+  const totalPracs = document.getElementById('t-total-pracs');
+  if (totalPracs) totalPracs.textContent = pracs.length;
+
+  const totalPublished = document.getElementById('t-published');
+  if (totalPublished) totalPublished.textContent = published.length;
+
+  const pendingGrade = document.getElementById('t-pending-grade');
+  if (pendingGrade) pendingGrade.textContent = pending.length;
+
+  const studentCount = document.getElementById('t-student-count');
+  if (studentCount) studentCount.textContent = alumnos.length;
+
+  const totalSubmissions = document.getElementById('t-total-submissions');
+  if (totalSubmissions) totalSubmissions.textContent = entregas.length;
 
   const tr = document.getElementById('t-recent-submissions');
-  const recent = [...state.submissions].sort((a,b) => b.submittedAt - a.submittedAt).slice(0, 5);
-  if (recent.length === 0) {
-    tr.innerHTML = '<div class="empty"><div class="eico">📮</div><div class="etxt">Sin entregas todavía.</div></div>';
-  } else {
-    tr.innerHTML = recent.map(s => {
-      const prac = state.practices.find(p => p.id === s.practiceId);
-      return `
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:8px 0;border-bottom:1px solid var(--b)">
-          <div>
-            <div style="font-weight:600">${s.studentName}</div>
-            <div style="color:var(--td);font-size:11px">${prac?.num} ${prac?.title || ''}</div>
-          </div>
-          ${s.grade != null
-            ? `<span class="tag tg">${s.grade}/10</span>`
-            : '<span class="tag tw">Sin calificar</span>'}
-        </div>`;
-    }).join('');
+  const recent = [...entregas]
+    .sort((a, b) => new Date(b.submittedAt || b.submitted_at || 0) - new Date(a.submittedAt || a.submitted_at || 0))
+    .slice(0, 5);
+
+  if (tr) {
+    if (recent.length === 0) {
+      tr.innerHTML = '<div class="empty"><div class="eico">📮</div><div class="etxt">Sin entregas todavía.</div></div>';
+    } else {
+      tr.innerHTML = recent.map(s => {
+        const pracId = s.practiceId || s.practice_id;
+        const prac = pracs.find(p => p.id === pracId);
+
+        return `
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:8px 0;border-bottom:1px solid var(--b)">
+            <div>
+              <div style="font-weight:600">${s.studentName || s.student_name || 'Alumno'}</div>
+              <div style="color:var(--td);font-size:11px">${prac?.num || ''} ${prac?.title || ''}</div>
+            </div>
+            ${s.grade != null
+              ? `<span class="tag tg">${s.grade}/10</span>`
+              : '<span class="tag tw">Sin calificar</span>'}
+          </div>`;
+      }).join('');
+    }
   }
 
   const tg = document.getElementById('t-group-status');
-  if (published.length === 0) {
-    tg.innerHTML = '<div class="empty"><div class="eico">👥</div><div class="etxt">Publica prácticas para ver el progreso.</div></div>';
-  } else {
-    tg.innerHTML = published.map(p => {
-      const count = state.submissions.filter(s => s.practiceId === p.id).length;
-      const total = state.students.length;
-      const pct   = total ? Math.round(count / total * 100) : 0;
-      return `
-        <div style="margin-bottom:6px">
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-            <span>${p.num} ${p.title.substring(0,30)}…</span>
-            <span style="font-family:var(--mono);color:var(--td)">${count}/${total}</span>
-          </div>
-          <div class="pw"><div class="pb" style="width:${pct}%"></div></div>
-        </div>`;
-    }).join('');
+
+  if (tg) {
+    if (published.length === 0) {
+      tg.innerHTML = '<div class="empty"><div class="eico">👥</div><div class="etxt">Publica prácticas para ver el progreso.</div></div>';
+    } else {
+      tg.innerHTML = published.map(p => {
+        const count = entregas.filter(s => (s.practiceId || s.practice_id) === p.id).length;
+        const total = alumnos.length;
+        const pct = total ? Math.round(count / total * 100) : 0;
+
+        return `
+          <div style="margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+              <span>${p.num} ${(p.title || '').substring(0,30)}…</span>
+              <span style="font-family:var(--mono);color:var(--td)">${count}/${total}</span>
+            </div>
+            <div class="pw"><div class="pb" style="width:${pct}%"></div></div>
+          </div>`;
+      }).join('');
+    }
   }
 
-  ElectroLab.renderStudentList();
-  ElectroLab.renderStudentCount();
-
-  const tse = document.getElementById('t-total-submissions');
-  if (tse) tse.textContent = state._submissions.length;
-
-  populateForumSelects();
-  populateMaterialSelects();
-  renderMaterialList();
+  await renderStudentList();
+  await renderStudentCount();
+  await populateForumSelects();
+  await populateMaterialSelects();
+  await renderMaterialList();
 }
-
-function populateForumSelects() {
-  const state    = ElectroLab.AppState;
-  const stuSel   = document.getElementById('foro-student');
-  const pracSel  = document.getElementById('foro-practice');
-  if (stuSel)  stuSel.innerHTML  = state.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-  if (pracSel) pracSel.innerHTML = '<option value="">— Selecciona —</option>' +
-    state.getPublishedPractices().map(p => `<option value="${p.id}">${p.num} — ${p.title}</option>`).join('');
-}
-
-function populateMaterialSelects() {
-  const sel = document.getElementById('mat-practice');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">— General —</option>' +
-    ElectroLab.AppState.getPublishedPractices()
-      .map(p => `<option value="${p.id}">${p.num} — ${p.title}</option>`).join('');
-}
-
 
 function addCustomComponent() {
   const name = prompt('Nombre del componente:');
