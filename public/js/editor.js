@@ -63,7 +63,7 @@ function addCustomComponent() {
   if (!name?.trim()) return;
   const row = document.createElement('div');
   row.className = 'chi';
-  row.innerHTML = <input type="checkbox" checked><span>${name.trim()}</span>;
+  row.innerHTML = `<input type="checkbox" checked><span>${name.trim()}</span>`;
   document.getElementById('ed-comp-list').appendChild(row);
 }
 
