@@ -3,10 +3,7 @@
 const express = require('express');
 const router  = express.Router();
 const DB      = require('../db');
-// Nota: Para producción real, se recomienda instalar: npm install bcrypt
-// const bcrypt = require('bcrypt'); 
 
-// GET: Obtener la lista completa de alumnos registrados
 router.get('/', async (req, res, next) => {
   try {
     const alumnos = await DB.getAlumnos();
@@ -16,7 +13,6 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// GET/:id - Obtener un alumno específico por su ID
 router.get('/:id', async (req, res, next) => {
   try {
     const alumno = await DB.getAlumnoById(req.params.id);
@@ -27,90 +23,63 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// POST: Registrar un nuevo alumno (Uso en portal de inscripción)
 router.post('/', async (req, res, next) => {
   try {
-    const { name, email, matricula, group, password } = req.body;
+const { name, email, matricula, group, password } = req.body;
 
-    // Validaciones estrictas de campos obligatorios
     if (!name?.trim()) {
       return res.status(400).json({ error: 'El nombre es obligatorio.' });
     }
     if (!matricula?.trim()) {
-      return res.status(400).json({ error: 'La matrícula (boleta) es obligatoria.' });
+      return res.status(400).json({ error: 'La matrícula es obligatoria.' });
     }
 
-    // Validación de duplicados: Evita que dos alumnos compartan la misma boleta
     const existe = await DB.matriculaExists(matricula.trim());
     if (existe) {
-      return res.status(409).json({ error: `La matrícula o boleta ${matricula} ya está registrada.` });
+      return res.status(409).json({ error: `La matrícula ${matricula} ya está registrada.` });
     }
-
-    // --- PROTECCIÓN DE CONTRASEÑA (Seguridad Básica) ---
-    const plainPassword = password?.trim() || '1234';
-    // En producción usarías: const hashedPassword = await bcrypt.hash(plainPassword, 10);
-    const hashedPassword = plainPassword; // Clonado temporal en lo que integras hashing
 
     const alumno = await DB.createAlumno({
       name:      name.trim(),
       email:     email?.trim()     || '',
       matricula: matricula.trim(),
-      group:     group?.trim()     || '3IV17', // Consecuente con tu grupo de Electrotecnia
-      password:  hashedPassword, 
-      active:    true // Se inicializa como un usuario activo por defecto
+      group:     group?.trim()     || 'G1',
+      password: password?.trim() || '1234',
     });
 
-    // Seguridad adicional: Removemos la contraseña del objeto antes de responder al cliente
-    const respuestaSegura = { ...alumno };
-    delete respuestaSegura.password;
-
-    res.status(201).json(respuestaSegura);
+    res.status(201).json(alumno);
   } catch (err) {
     next(err);
   }
 });
 
-// PATCH: Modificar parcialmente los datos de un alumno
 router.patch('/:id', async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const alumno = await DB.getAlumnoById(id);
+    const alumno = await DB.getAlumnoById(req.params.id);
     if (!alumno) return res.status(404).json({ error: 'Alumno no encontrado.' });
 
-    // Campos cuya modificación controlada es segura
     const allowed = ['name', 'email', 'group', 'active'];
     const changes = {};
-    
     allowed.forEach(key => {
-      if (req.body[key] !== undefined) {
-        changes[key] = (typeof req.body[key] === 'string') ? req.body[key].trim() : req.body[key];
-      }
+      if (req.body[key] !== undefined) changes[key] = req.body[key];
     });
 
-    const updated = await DB.updateAlumno(id, changes);
-    
-    // Ocultar contraseña en la respuesta
-    if (updated) delete updated.password;
-
+    const updated = await DB.updateAlumno(req.params.id, changes);
     res.json(updated);
   } catch (err) {
     next(err);
   }
 });
 
-// DELETE: Dar de baja un alumno de la base de datos
 router.delete('/:id', async (req, res, next) => {
   try {
     const alumno = await DB.getAlumnoById(req.params.id);
     if (!alumno) return res.status(404).json({ error: 'Alumno no encontrado.' });
-    
     await DB.deleteAlumno(req.params.id);
-    res.json({ ok: true, message: `El estudiante "${alumno.name}" fue dado de baja exitosamente.` });
+    res.json({ ok: true, message: `"${alumno.name}" dado de baja.` });
   } catch (err) {
     next(err);
   }
 });
-
-module.exports = router;
 
 module.exports = router;
