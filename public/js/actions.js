@@ -5,7 +5,7 @@ async function addPractice(data) {
   if (!data.title?.trim()) { notify('El título es obligatorio.', 'error'); throw new Error('Título vacío'); }
   const saved = await API.practicas.create({ ...data, createdBy: AppState.currentUser?.id });
   AppState.invalidate('practicas');
-  notify("${saved.title}" guardada como borrador., 'success');
+  notify(`"${saved.title}" guardada como borrador.`, 'success');
   return saved;
 }
 
@@ -13,7 +13,7 @@ async function publishPractice(id) {
   requirePermission('canPublishPractice');
   const updated = await API.practicas.publish(id);
   AppState.invalidate('practicas');
-  notify("${updated.title}" publicada., 'success');
+  notify(`"${updated.title}" publicada.`, 'success');
   return updated;
 }
 
@@ -21,7 +21,7 @@ async function unpublishPractice(id) {
   requirePermission('canPublishPractice');
   const updated = await API.practicas.unpublish(id);
   AppState.invalidate('practicas');
-  notify("${updated.title}" regresada a borrador., 'info');
+  notify(`"${updated.title}" regresada a borrador.`, 'info');
   return updated;
 }
 
@@ -30,7 +30,7 @@ async function deletePractice(id) {
   const pracs = await AppState.getPracticas();
   const p = pracs.find(x => x.id === id);
   if (p?.status === 'published') {
-    const ok = confirm(¿Eliminar "${p.title}"?\nEsta acción no se puede deshacer.);
+    const ok = confirm(`¿Eliminar "${p.title}"?\nEsta acción no se puede deshacer.`);
     if (!ok) return;
   }
   await API.practicas.delete(id);
@@ -44,7 +44,7 @@ async function enrollStudent(data) {
   if (!data.matricula?.trim()) { notify('La matrícula es obligatoria.', 'error');  throw new Error('Matrícula vacía'); }
   const saved = await API.alumnos.create(data);
   AppState.invalidate('alumnos');
-  notify(Alumno "${saved.name}" inscrito., 'success');
+  notify(`Alumno "${saved.name}" inscrito.`, 'success');
   return saved;
 }
 
@@ -53,11 +53,11 @@ async function removeStudent(id) {
   const alumnos = await AppState.getAlumnos();
   const s = alumnos.find(x => x.id === id);
   if (!s) return notify('Alumno no encontrado.', 'error');
-  const ok = confirm(¿Dar de baja a "${s.name}" (${s.matricula})?\nSus entregas se conservarán.);
+  const ok = confirm(`¿Dar de baja a "${s.name}" (${s.matricula})?\nSus entregas se conservarán.`);
   if (!ok) return;
   await API.alumnos.delete(id);
   AppState.invalidate('alumnos');
-  notify("${s.name}" dado de baja., 'info');
+  notify(`"${s.name}" dado de baja.`, 'info');
 }
 
 async function updateStudent(id, changes) {
@@ -91,7 +91,7 @@ async function submitWork(data) {
 
   notify(
     data.type === 'quiz'
-      ? Cuestionario enviado — puntaje: ${quizScore}/${practice.quiz?.length ?? '?'}
+      ? `Cuestionario enviado — puntaje: ${quizScore}/${practice.quiz?.length ?? '?'}`
       : 'Foto entregada. El docente la revisará pronto.',
     'success'
   );
@@ -102,7 +102,7 @@ async function gradeSubmissionAction(submissionId, grade, feedback) {
   requirePermission('canGrade');
   if (isNaN(grade) || grade < 0 || grade > 10) { notify('La calificación debe ser entre 0 y 10.', 'error'); return; }
   const saved = await API.entregas.calificar(submissionId, Number(grade), feedback || '');
-  notify(Calificación ${grade}/10 guardada., 'success');
+  notify(`Calificación ${grade}/10 guardada.`, 'success');
   return saved;
 }
 
@@ -159,7 +159,7 @@ async function addMaterial(file, meta) {
   requirePermission('canUploadMaterial');
   const saved = await API.materiales.create(file, { ...meta, uploadedBy: AppState.currentUser?.id });
   AppState.invalidate('materiales');
-  notify("${saved.name}" subido., 'success');
+  notify(`"${saved.name}" subido.`, 'success');
   return saved;
 }
 
