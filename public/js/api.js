@@ -14,14 +14,14 @@ function clearToken() {
 
 async function apiFetch(path, opts = {}) {
   const url = CONFIG.API_BASE + path;
-  const headers = { 'Authorization': Bearer ${getToken()}, ...opts.headers };
+  const headers = { 'Authorization': `Bearer ${getToken()}`, ...opts.headers };
   if (opts.body && !(opts.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
   const res = await fetch(url, { ...opts, headers });
   if (!res.ok) {
     const errData = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(errData.error || Error ${res.status});
+    throw new Error(errData.error || `Error ${res.status}`);
   }
   return res.json();
 }
@@ -33,30 +33,30 @@ const API = {
   },
 
   practicas: {
-    getAll:    (role = 'student') => apiFetch(/practicas?role=${role}),
-    getById:   (id)               => apiFetch(/practicas/${id}),
+    getAll:    (role = 'student') => apiFetch(`/practicas?role=${role}`),
+    getById:   (id)               => apiFetch(`/practicas/${id}`),
     create:    (data)             => apiFetch('/practicas', { method: 'POST', body: JSON.stringify(data) }),
-    update:    (id, changes)      => apiFetch(/practicas/${id}, { method: 'PATCH', body: JSON.stringify(changes) }),
-    delete:    (id)               => apiFetch(/practicas/${id}, { method: 'DELETE' }),
-    publish:   (id)               => apiFetch(/practicas/${id}, { method: 'PATCH', body: JSON.stringify({ status: 'published' }) }),
-    unpublish: (id)               => apiFetch(/practicas/${id}, { method: 'PATCH', body: JSON.stringify({ status: 'draft' }) }),
+    update:    (id, changes)      => apiFetch(`/practicas/${id}`, { method: 'PATCH', body: JSON.stringify(changes) }),
+    delete:    (id)               => apiFetch(`/practicas/${id}`, { method: 'DELETE' }),
+    publish:   (id)               => apiFetch(`/practicas/${id}`, { method: 'PATCH', body: JSON.stringify({ status: 'published' }) }),
+    unpublish: (id)               => apiFetch(`/practicas/${id}`, { method: 'PATCH', body: JSON.stringify({ status: 'draft' }) }),
   },
 
   alumnos: {
     getAll:  ()            => apiFetch('/alumnos'),
-    getById: (id)          => apiFetch(/alumnos/${id}),
+    getById: (id)          => apiFetch(`/alumnos/${id}`),
     create:  (data)        => apiFetch('/alumnos', { method: 'POST', body: JSON.stringify(data) }),
-    update:  (id, changes) => apiFetch(/alumnos/${id}, { method: 'PATCH', body: JSON.stringify(changes) }),
-    delete:  (id)          => apiFetch(/alumnos/${id}, { method: 'DELETE' }),
+    update:  (id, changes) => apiFetch(`/alumnos/${id}`, { method: 'PATCH', body: JSON.stringify(changes) }),
+    delete:  (id)          => apiFetch(`/alumnos/${id}`, { method: 'DELETE' }),
   },
 
   entregas: {
     getAll: (filters = {}) => {
       const params = new URLSearchParams(filters);
-      return apiFetch(/entregas?${params});
+      return apiFetch(`/entregas?${params}`);
     },
     create:    (data)              => apiFetch('/entregas', { method: 'POST', body: JSON.stringify(data) }),
-    calificar: (id, grade, fb)     => apiFetch(/entregas/${id}/calificar, { method: 'PATCH', body: JSON.stringify({ grade, feedback: fb }) }),
+    calificar: (id, grade, fb)     => apiFetch(`/entregas/${id}/calificar`, { method: 'PATCH', body: JSON.stringify({ grade, feedback: fb }) }),
   },
 
   materiales: {
@@ -70,6 +70,6 @@ const API = {
       form.append('uploadedBy', uploadedBy || '');
       return apiFetch('/materiales', { method: 'POST', body: form });
     },
-    delete: (id) => apiFetch(/materiales/${id}, { method: 'DELETE' }),
+    delete: (id) => apiFetch(`/materiales/${id}`, { method: 'DELETE' }),
   },
 };
