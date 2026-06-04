@@ -4,7 +4,7 @@ function validateFile(file, context = 'material') {
   const ext = '.' + file.name.toLowerCase().split('.').pop();
 
   if (!CONFIG.ALLOWED_EXTENSIONS.includes(ext)) {
-    notify(Extensión "${ext}" no permitida., 'error');
+    notify(`Extensión "${ext}" no permitida.`, 'error');
     return false;
   }
 
@@ -16,7 +16,7 @@ function validateFile(file, context = 'material') {
 
   const limitBytes = (context === 'photo' ? CONFIG.MAX_PHOTO_SIZE_MB : CONFIG.MAX_FILE_SIZE_MB) * 1024 * 1024;
   if (file.size > limitBytes) {
-    notify(El archivo pesa ${(file.size/1024/1024).toFixed(1)} MB. Máximo: ${limitBytes/1024/1024} MB., 'error');
+    notify(`El archivo pesa ${(file.size/1024/1024).toFixed(1)} MB. Máximo: ${limitBytes/1024/1024} MB.`, 'error');
     return false;
   }
   if (file.size === 0) { notify('El archivo está vacío.', 'error'); return false; }
@@ -62,7 +62,7 @@ async function handlePhotoUpload(event, practiceId) {
     });
 
     setTimeout(() => {
-      const card = document.getElementById(task-card-${practiceId});
+      const card = document.getElementById(`task-card-${practiceId}`);
       if (card) {
         card.style.opacity = '0.5';
         card.style.pointerEvents = 'none';
@@ -97,16 +97,16 @@ async function handleEditorFiles(event) {
 }
 
 function setDropZoneLoading(el, name) {
-  el.innerHTML = <div style="font-size:24px;margin-bottom:8px">⏳</div><div style="font-family:var(--mono);font-size:12px;color:var(--td)">Subiendo ${name}…</div>;
+  el.innerHTML = `<div style="font-size:24px;margin-bottom:8px">⏳</div><div style="font-family:var(--mono);font-size:12px;color:var(--td)">Subiendo ${name}…</div>`;
 }
 
 function setDropZoneSuccess(el, name, sizeBytes) {
   const mb = (sizeBytes / 1024 / 1024).toFixed(2);
-  el.innerHTML = <div style="font-size:24px;margin-bottom:8px">✅</div><div style="font-family:var(--mono);font-size:12px;color:var(--a3)">${name}</div><div style="font-size:11px;color:var(--tf);margin-top:4px">${mb} MB</div>;
+  el.innerHTML = `<div style="font-size:24px;margin-bottom:8px">✅</div><div style="font-family:var(--mono);font-size:12px;color:var(--a3)">${name}</div><div style="font-size:11px;color:var(--tf);margin-top:4px">${mb} MB</div>`;
 }
 
 function setDropZoneError(el) {
-  el.innerHTML = <div style="font-size:24px;margin-bottom:8px">❌</div><div style="font-family:var(--mono);font-size:12px;color:var(--ar)">Archivo no válido o error al subir</div>;
+  el.innerHTML = `<div style="font-size:24px;margin-bottom:8px">❌</div><div style="font-family:var(--mono);font-size:12px;color:var(--ar)">Archivo no válido o error al subir</div>`;
   setTimeout(() => resetDropZoneEl(el), 3000);
 }
 
@@ -114,7 +114,7 @@ function resetDropZoneEl(el) {
   const ctx  = el.dataset.context || 'material';
   const lim  = ctx === 'photo' ? CONFIG.MAX_PHOTO_SIZE_MB : CONFIG.MAX_FILE_SIZE_MB;
   const exts = ctx === 'photo' ? 'JPG · PNG · WEBP · HEIC · PDF' : 'PDF · .ino · Imágenes · Video';
-  el.innerHTML = <input type="file" style="display:none"><div style="font-size:28px;margin-bottom:8px">📁</div><div style="font-family:var(--mono);font-size:12px;color:var(--td)">Arrastra o haz clic</div><div style="font-size:11px;color:var(--tf);margin-top:4px">${exts} · máx. ${lim} MB</div>;
+  el.innerHTML = `<input type="file" style="display:none"><div style="font-size:28px;margin-bottom:8px">📁</div><div style="font-family:var(--mono);font-size:12px;color:var(--td)">Arrastra o haz clic</div><div style="font-size:11px;color:var(--tf);margin-top:4px">${exts} · máx. ${lim} MB</div>`;
 }
 
 function resetDropZoneById(id) {
