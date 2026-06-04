@@ -1,4 +1,3 @@
-
 'use strict';
 
 const express = require('express');
@@ -130,7 +129,5 @@ router.delete('/:id', async (req, res, next) => {
     next(err);
   }
 });
-
-module.exports = router;
 
 module.exports = router;
