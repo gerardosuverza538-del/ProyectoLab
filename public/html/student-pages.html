@@ -1,6 +1,6 @@
 <div class="page on" id="s-dashboard">
-  <div class="ptitle">Dashboard</div>
-  <div class="psub" id="dash-subtitle">// Electroctenia IPN</div>
+  <div class="ptitle">Dashboard del Estudiante</div>
+  <div class="psub" id="dash-subtitle">// Cargando…</div>
 
   <div class="g3" style="margin-bottom:20px">
     <div class="scard">
@@ -52,19 +52,18 @@
   </div>
 </div>
 
-<div class="page" id="s-practicas">
+<div class="page" id="s-practicas" style="display:none">
   <div class="ptitle">Prácticas del Curso</div>
   <div class="psub">// Solo se muestran las prácticas publicadas por el docente</div>
   <div class="ga" id="prac-list">
     <div class="empty">
       <div class="eico">📭</div>
       <div class="etxt">Aún no hay prácticas publicadas.</div>
-      <div class="esub">Tu maestro las irá subiendo durante el curso.</div>
     </div>
   </div>
 </div>
 
-<div class="page" id="s-tareas">
+<div class="page" id="s-tareas" style="display:none">
   <div class="ptitle">Mis Tareas</div>
   <div class="psub">// Completa cuestionarios y sube fotos directamente desde aquí</div>
   <div class="ga" id="task-list">
@@ -75,7 +74,28 @@
   </div>
 </div>
 
-<div class="page" id="s-lab">
+<div class="page" id="s-calificaciones" style="display:none">
+  <div class="ptitle">Boleta de Evaluaciones</div>
+  <div class="psub">// Historial oficial de reportes calificados bajo rúbrica de Electrotecnia</div>
+  
+  <div class="card" style="overflow-x:auto">
+    <table style="width:100%; border-collapse:collapse; font-size:13px; min-width:600px">
+      <thead>
+        <tr style="border-bottom:1px solid var(--b); font-family:var(--mono); font-size:10px; color:var(--tf)">
+          <th style="padding:12px; text-align:left">Código / Práctica</th>
+          <th style="padding:12px; text-align:left">Formato</th>
+          <th style="padding:12px; text-align:left">Estatus de Revisión</th>
+          <th style="padding:12px; text-align:left">Calificación (0-10)</th>
+          <th style="padding:12px; text-align:left">Retroalimentación del Docente</th>
+        </tr>
+      </thead>
+      <tbody id="student-grades-table">
+        </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="page" id="s-lab" style="display:none">
   <div class="ptitle">Laboratorio Virtual</div>
   <div class="psub">// Documentación técnica y materiales del módulo</div>
   <div id="lab-materials" class="ga">
@@ -86,65 +106,19 @@
   </div>
 </div>
 
-<div class="page" id="s-comp">
+<div class="page" id="s-comp" style="display:none">
   <div class="ptitle">Practica con tus Componentes</div>
   <div class="psub">// Funcionamiento básico de cada pieza del módulo</div>
-  <div class="ga" id="comp-cards">
-    </div>
+  <div class="ga" id="comp-cards"></div>
 </div>
 
 
-<template id="tmpl-dash-prac-item">
-  <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--b); font-size:13px;">
-    <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:75%;">
-      <span class="tag tc num-tag" style="margin-right:8px; font-weight:bold;">N° 00</span>
-      <span class="title-text">Nombre de la Práctica</span>
-    </div>
-    <span class="tag diff-tag" style="background:var(--b); color:var(--tf); font-size:11px;">Nivel 1</span>
-  </div>
-</template>
-
-<template id="tmpl-dash-sub-item">
-  <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--b); font-size:13px;">
-    <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">
-      <span class="type-text" style="opacity:0.7;">📸 Foto</span> — <strong class="title-text">Práctica</strong>
-    </div>
-    <div class="badge-container"></div>
-  </div>
-</template>
-
-<template id="tmpl-full-prac-card">
-  <div class="card spec-card" style="padding:16px; display:flex; flex-direction:column; gap:12px; border-left: 4px solid var(--ac, #0056b3);">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <span class="tag tc num-tag" style="font-weight:bold; letter-spacing:0.5px;">PRÁCTICA ESPECÍFICA N° 00</span>
-      <span class="tag diff-tag" style="background:var(--b); font-family:var(--mono);">Complejidad: ⚡</span>
-    </div>
-    <h3 class="title-text" style="margin:0; font-size:16px; color:var(--th);">Título</h3>
-    <p style="font-size:13px; color:var(--tf); margin:0; line-height:1.4;">
-      <strong>Objetivo general:</strong> <span class="obj-text">Objetivo...</span>
-    </p>
-    <div style="font-size:12px; background:rgba(0,0,0,0.02); padding:8px; border-radius:4px;">
-      <strong style="display:block; margin-bottom:4px; color:var(--td);">Lista de Componentes en el Módulo:</strong>
-      <div class="comp-container" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-    </div>
-    <div style="margin-top:4px; display:flex; gap:8px;">
-      <button type="button" class="btn btn-sm view-btn" style="font-size:12px; padding:6px 12px;">
-        📖 Abrir Guía de Conexión
-      </button>
-    </div>
-  </div>
-</template>
-
-<template id="tmpl-full-task-card">
-  <div class="card" style="padding:16px; margin-bottom:16px; border:1px solid rgba(0,0,0,0.08);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-      <strong class="title-text" style="font-size:14px; color:var(--th);">Práctica 00: Título</strong>
-      <span class="tag tr" style="background:var(--ar, #c62828); color:#fff; font-size:11px; font-weight:bold;">Evidencia Solicitada</span>
-    </div>
-    <p style="font-size:13px; color:var(--tf); margin:0 0 12px 0; line-height:1.4;">
-      Revisa la documentación técnica en el Laboratorio Virtual. Una vez armado el circuito físico en el protoboard de manera individual, sube tu reporte o realiza la validación correspondiente de acuerdo con los criterios establecidos.
-    </p>
-    <div class="action-container" style="border-top:1px dashed var(--b); padding-top:14px;">
-      </div>
-  </div>
+<template id="tmpl-grade-row">
+  <tr style="border-bottom:1px solid var(--b); transition: background 0.2s;">
+    <td style="padding:12px; font-weight:bold;" class="g-prac-title">P-01: Carga Básica</td>
+    <td style="padding:12px; font-family:var(--mono); font-size:11px;" class="g-prac-type">📸 Foto</td>
+    <td style="padding:12px;" class="g-prac-status">---</td>
+    <td style="padding:12px; font-weight:bold; font-size:14px;" class="g-prac-score">0.0</td>
+    <td style="padding:12px; color:var(--tf); font-style:italic;" class="g-prac-feedback">Sin comentarios aún.</td>
+  </tr>
 </template>
